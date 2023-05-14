@@ -6,7 +6,8 @@ import { registerLocaleData } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 registerLocaleData(localePt);
 @NgModule({
   declarations: [
@@ -16,6 +17,8 @@ registerLocaleData(localePt);
     BrowserModule,
     AppRoutingModule,
     FormsModule,
+    HttpClientModule,
+    ReactiveFormsModule
   ],
   providers: [ { provide: LOCALE_ID, useValue: 'pt-BR' }],
   bootstrap: [AppComponent]

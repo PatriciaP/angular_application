@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { Transaction } from './transaction';
+import { HttpClient } from '@angular/common/http';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -7,18 +9,31 @@ import { Transaction } from './transaction';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
- 
-  transactions: Transaction[] = [
-    { id: 1, date: new Date('2022-05-01'), description: 'Salary', amount: 5000 },
-    { id: 2, date: new Date('2022-05-02'), description: 'Rent', amount: -1000 },
-    { id: 3, date: new Date('2022-05-03'), description: 'Groceries', amount: -200 }
-  ];
-  
+
+  transactions: Transaction[] = [];
   newTransaction: Transaction = { id: 0, date: new Date, description: '', amount: 0 };
   editingTransaction: Transaction | null = null;
 
+
+  transactionForm: FormGroup;
+
+  constructor(private formBuilder: FormBuilder, private http: HttpClient) {
+    this.transactionForm = this.formBuilder.group({
+      date: ['', [Validators.required, Validators.pattern(/^\d{4}-\d{2}-\d{2}$/)]],
+      description: ['', Validators.required],
+      amount: ['', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)]]
+
+    });
+  }
+
+  ngOnInit() {
+    this.http.get<Transaction[]>('/assets/data.json')
+      .subscribe(transactions => this.transactions = transactions);
+  }
+  
+ 
   addTransaction() {
-    if (this.newTransaction.description && this.newTransaction.amount) {
+    if (this.newTransaction.date && this.newTransaction.description && this.newTransaction.amount) {
       this.newTransaction.id = this.transactions.length + 1;
       this.transactions.push(this.newTransaction);
       this.newTransaction = { id: 0, date: new Date, description: '', amount: 0 };
