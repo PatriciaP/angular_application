@@ -37,7 +37,7 @@
   <form *ngIf="!editingTransaction" (ngSubmit)="addTransaction()" #transactionForm="ngForm">
     <h2>Add Transaction</h2>
     <div class="form-row">
-      <div class="form-group">
+      <div class="form-group inline">
         <label>Date:</label>
         <input type="date" [(ngModel)]="newTransaction.date" name="date" required pattern="\d{4}-\d{2}-\d{2}" #dateInput="ngModel">
         <div *ngIf="dateInput.invalid">
@@ -46,7 +46,7 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group inline">
         <label>Description:</label>
         <input [(ngModel)]="newTransaction.description" name="description" required #descriptionInput="ngModel">
         <div *ngIf="descriptionInput.invalid " class="error">
@@ -54,7 +54,7 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group inline">
         <label>Amount:</label>
         <input type="number" [(ngModel)]="newTransaction.amount" name="amount" required pattern="^-?(?!0(\.0+)?$)\d+(\.\d{1,2})?$" #amountInput="ngModel">
         <div *ngIf="amountInput.invalid">
@@ -63,11 +63,12 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <button type="submit" class="btn-primary">Add</button>
-        <div *ngIf="transactionForm.form.invalid && (transactionForm.submitted || transactionForm.dirty)" class="error">
-          Please fill in all required fields.
-        </div>
+
+    </div>
+    <div class="form-group inline">
+      <button type="submit" class="btn-primary">Add</button>
+      <div *ngIf="transactionForm.form.invalid && (transactionForm.submitted || transactionForm.dirty)" class="error">
+        Please fill in all required fields.
       </div>
     </div>
   </form>
@@ -75,27 +76,28 @@
   <form *ngIf="editingTransaction" (ngSubmit)="saveTransaction()">
     <h2>Edit Transaction</h2>
     <div class="form-row">
-      <div class="form-group">
+      <div class="form-group inline">
         <label>Date:</label>
         <input type="date" [(ngModel)]="editingTransaction.date" name="date" required>
       </div>
 
-      <div class="form-group">
+      <div class="form-group inline">
         <label>Description:</label>
         <input type="text" [(ngModel)]="editingTransaction.description" name="description" required>
       </div>
 
-      <div class="form-group">
+      <div class="form-group inline">
         <label>Amount:</label>
         <input type="number" [(ngModel)]="editingTransaction.amount" name="amount" required>
       </div>
 
-      <div class="form-group">
-        <button type="submit" class="btn-primary">Update</button>
-        <button (click)="cancelEditing()" class="btn-delete">Cancel</button>
-      </div>
+    </div>
+    <div class="form-group inline">
+      <button type="submit" class="btn-primary">Update</button>
+      <button (click)="cancelEditing()" class="btn-delete">Cancel</button>
     </div>
   </form>
+
 
   <hr>
 
