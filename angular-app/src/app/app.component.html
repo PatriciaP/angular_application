@@ -1,105 +1,116 @@
 <div class="container">
   <h1>Finance Manager</h1>
 
-  <h2>Transactions</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Description</th>
-        <th>Amount</th>
-        <th>Date</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let transaction of transactions">
-        <td>{{ transaction.description }}</td>
-        <td [ngClass]="{'negative': transaction.amount < 0, 'positive': transaction.amount >= 0}">{{ transaction.amount | currency:'BRL' }}</td>
-        <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+  <div class="section">
 
+    <button *ngIf="!editingTransaction && !addingTransaction" (click)="showAddTransactionForm()" class="btn-primary form-right">New Transaction</button>
 
-        <td>
-          <button (click)="editTransaction(transaction)" class="btn-primary">Edit</button>
-          <button (click)="deleteTransaction(transaction.id)" class="btn-delete">Delete</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <tfoot>
-  <tr>
-    <td><strong>Balance:</strong></td>
-    <td  [ngClass]="{'negative': calculateBalance() < 0, 'positive': calculateBalance() >= 0}">{{ calculateBalance() | currency:'BRL' }}</td>
-    <td></td>
-    <td></td>
-  </tr>
-  </tfoot>
-
-  <form *ngIf="!editingTransaction" (ngSubmit)="addTransaction()" #transactionForm="ngForm">
-    <h2>Add Transaction</h2>
-    <div class="form-row">
-      <div class="form-group inline">
-        <label>Date:</label>
+    <form *ngIf="!editingTransaction && addingTransaction" (ngSubmit)="addTransaction()" #transactionForm="ngForm">
+      <h2>Add Transaction</h2>
+      <div class="form-group">
+        <label for="transactionType">Type:</label>
+        <select id="transactionType" [(ngModel)]="newTransaction.type" name="type" required>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="date">Date:</label>
         <input type="date" [(ngModel)]="newTransaction.date" name="date" required pattern="\d{4}-\d{2}-\d{2}" #dateInput="ngModel">
         <div *ngIf="dateInput.invalid">
           <small class="error" *ngIf="transactionForm.controls['date'].hasError('required')">Date is required.</small>
           <small class="error" *ngIf="transactionForm.controls['date'].hasError('pattern')">Please enter a valid date.</small>
         </div>
       </div>
-
-      <div class="form-group inline">
-        <label>Description:</label>
+      <div class="form-group">
+        <label for="description">Description:</label>
         <input [(ngModel)]="newTransaction.description" name="description" required #descriptionInput="ngModel">
-        <div *ngIf="descriptionInput.invalid " class="error">
-          <small class="error" *ngIf="descriptionInput.errors?.['required']">Description is required.</small>
+        <div *ngIf="descriptionInput.invalid" class="error">
+          <small class="error" *ngIf="transactionForm.controls['description'].hasError('required')">Description is required.</small>
         </div>
       </div>
-
-      <div class="form-group inline">
-        <label>Amount:</label>
+      <div class="form-group">
+        <label for="amount">Amount:</label>
         <input type="number" [(ngModel)]="newTransaction.amount" name="amount" required pattern="^-?(?!0(\.0+)?$)\d+(\.\d{1,2})?$" #amountInput="ngModel">
         <div *ngIf="amountInput.invalid">
           <small class="error" *ngIf="transactionForm.controls['amount'].hasError('required')">Amount is required.</small>
-          <small class="error" *ngIf="transactionForm.controls['amount'].hasError('pattern')">Amount its required and can't be 0.</small>
+          <small class="error" *ngIf="transactionForm.controls['amount'].hasError('pattern')">Amount is required and has to be greater than 0.</small>
         </div>
       </div>
+      <div class="form-group">
+        <div class="form-right">
+        <button type="submit" class="btn-primary">Add</button>
+        <button type="button" (click)="clearForm()" class="btn-delete">Cancel</button>
 
-
-    </div>
-    <div class="form-group inline">
-      <button type="submit" class="btn-primary">Add</button>
-      <div *ngIf="transactionForm.form.invalid && (transactionForm.submitted || transactionForm.dirty)" class="error">
-        Please fill in all required fields.
+        <div *ngIf="transactionForm.form.invalid && (transactionForm.submitted || transactionForm.dirty)" class="error">
+          Please fill in all required fields.
+        </div>
+        </div>
       </div>
-    </div>
-  </form>
+    </form>
 
-  <form *ngIf="editingTransaction" (ngSubmit)="saveTransaction()">
-    <h2>Edit Transaction</h2>
-    <div class="form-row">
-      <div class="form-group inline">
-        <label>Date:</label>
-        <input type="date" [(ngModel)]="editingTransaction.date" name="date" required>
+    <form *ngIf="editingTransaction" (ngSubmit)="saveTransaction()">
+      <h2>Edit Transaction</h2>
+      <div class="form-group">
+        <label for="type">Type:</label>
+        <select id="type" [(ngModel)]="editingTransaction.type" name="type" required>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
       </div>
-
-      <div class="form-group inline">
-        <label>Description:</label>
-        <input type="text" [(ngModel)]="editingTransaction.description" name="description" required>
+      <div class="form-group">
+        <label for="date">Date:</label>
+        <input id="date" type="date" [(ngModel)]="editingTransaction.date" name="date" required>
       </div>
-
-      <div class="form-group inline">
-        <label>Amount:</label>
-        <input type="number" [(ngModel)]="editingTransaction.amount" name="amount" required>
+      <div class="form-group">
+        <label for="description">Description:</label>
+        <input id="description" type="text" [(ngModel)]="editingTransaction.description" name="description" required>
       </div>
+      <div class="form-group">
+        <label for="amount">Amount:</label>
+        <input id="amount" type="number" [(ngModel)]="editingTransaction.amount" name="amount" required>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn-primary">Update</button>
+        <button (click)="cancelEditing()" class="btn-delete">Cancel</button>
+      </div>
+    </form>
+  </div>
 
-    </div>
-    <div class="form-group inline">
-      <button type="submit" class="btn-primary">Update</button>
-      <button (click)="cancelEditing()" class="btn-delete">Cancel</button>
-    </div>
-  </form>
+  <div class="section">
+    <h2>Transactions</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>Date</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let transaction of transactions">
+        <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ transaction.description }}</td>
+        <td [ngClass]="{'negative': transaction.type === 'expense', 'positive': transaction.type === 'income'}">{{ transaction.amount | currency:'BRL' }}</td>
+        <td>
+          <button (click)="editTransaction(transaction)" class="btn-primary">Edit</button>
+          <button (click)="deleteTransaction(transaction.id)" class="btn-delete">Delete</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+    <tfoot>
+    <tr>
+      <td><strong>Balance:</strong></td>
+      <td></td>
+      <td [ngClass]="{'negative': calculateBalance() < 0, 'positive': calculateBalance() >= 0}">{{ calculateBalance() | currency:'BRL' }}</td>
+      <td></td>
+    </tr>
+    </tfoot>
+  </div>
+
 
 
   <hr>
-
-
 </div>

@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import { Transaction } from './transaction';
-import { HttpClient } from '@angular/common/http';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {Component} from '@angular/core';
+import {Transaction} from './transaction';
+import {HttpClient} from '@angular/common/http';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -11,9 +11,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class AppComponent {
 
   transactions: Transaction[] = [];
-  newTransaction: Transaction = { id: 0, date: new Date, description: '', amount: 0 };
+  newTransaction: Transaction = { id: 0, date: new Date, description: '', amount: 0, type: 'income' || 'expense'};
   editingTransaction: Transaction | null = null;
-
+  addingTransaction: boolean = false;
 
   transactionForm: FormGroup;
 
@@ -21,22 +21,23 @@ export class AppComponent {
     this.transactionForm = this.formBuilder.group({
       date: ['', [Validators.required, Validators.pattern(/^\d{4}-\d{2}-\d{2}$/)]],
       description: ['', Validators.required],
-      amount: ['', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)]]
+      amount: ['', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
+      type: ['income' || 'expense', Validators.required]
 
     });
   }
 
   ngOnInit() {
-    this.http.get<Transaction[]>('/assets/data.json')
+    this.http.get<Transaction[]>('/assets/data1000.json')
       .subscribe(transactions => this.transactions = transactions);
   }
-  
- 
+
+
   addTransaction() {
     if (this.newTransaction.date && this.newTransaction.description && this.newTransaction.amount) {
       this.newTransaction.id = this.transactions.length + 1;
       this.transactions.push(this.newTransaction);
-      this.newTransaction = { id: 0, date: new Date, description: '', amount: 0 };
+      this.hideAddTransactionForm();
     }
   }
 
@@ -45,6 +46,7 @@ export class AppComponent {
   }
 
   editTransaction(transaction: Transaction) {
+    this.hideAddTransactionForm();
     this.editingTransaction = { ...transaction };
   }
 
@@ -63,7 +65,37 @@ export class AppComponent {
   }
 
   calculateBalance() {
-    return this.transactions.reduce((total, transaction) => total + transaction.amount, 0);
+    return this.transactions.reduce((total, transaction) => {
+      if (transaction.type === 'income') {
+        return total + transaction.amount;
+      } else {
+        return total - transaction.amount;
+      }
+    }, 0);
+  }
+
+  // Method to show the add transaction form
+  showAddTransactionForm() {
+    this.addingTransaction = true;
+  }
+
+  hideAddTransactionForm() {
+    this.newTransaction = { id: 0, date: new Date, description: '', amount: 0, type: 'income' || 'expense' };
+    this.addingTransaction = false;
+  }
+
+  clearForm() {
+    // Reset the newTransaction object to clear the form fields
+    this.newTransaction = {
+      id: 0,
+      type: 'income' || 'expense',
+      date: new Date(),
+      description: '',
+      amount: 0,
+    };
+
+    // Hide the add transaction form
+    this.hideAddTransactionForm();
   }
 
 }
